@@ -231,6 +231,7 @@ function atualizaMusica(){
     music.play()
 }
 
+// ----------------------- INICIANDO JOGO COM BOTÃO START--------------------------------
 function start(){
   var button  = document.getElementById("myBtn");
   button.addEventListener("click", iniciaGame);
@@ -248,7 +249,7 @@ function start(){
   }
 }
 
-
+// ------------------------------TELA DE GAME OVER--------------------------------------
 export function showGameOverScreen() {
   pause = true;
 
@@ -268,17 +269,33 @@ export function showGameOverScreen() {
 
 start();
 
+//------------------------------ADICIONANDO JOYSTICK------------------------------------------------
+
+function addJoysticks(){
+
+  var joy = nipplejs.create({
+    zone: document.getElementById('joystickWrapper1'),
+    mode: 'static',
+    position: {left: '20vw', top: '88vh'},
+});
+}
+
+//-----------------------------------------------
+//addJoysticks();
+
+//----------------------------FUNÇÃO RENDER---------------------------------------------------------
+
 function render()
 {
   if(keyboard.pressed('P') && canClick){
     canClick = false;
     pause = !pause;
-
+    
     setTimeout(() => {
       canClick = true;
     }, 500);
   }
-
+  addJoysticks();
   atualizaMusica();
 
   keyboardUpdate(keyboard, boxPlane, airPlane);

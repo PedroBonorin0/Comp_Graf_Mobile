@@ -19,7 +19,8 @@
   </script>  
 
 
-  <!--Criando tela de carregamento-->
+
+<!----------------------------Criando tela de carregamento------------------------>
   <section id="load-tela">
     <div class = "load-screen" id="load-screen">
       <div id="loader"></div>
@@ -27,7 +28,7 @@
     <button class="button" id="myBtn">START</button>
   </section>
 
-  <!--Criando tela de game over-->
+<!------------------------Criando tela de game over---------------->
   <section id="over">
     <div class = "game-over" id="game-over" style="display: none;">
       <div id="loader-over"></div>
@@ -36,14 +37,21 @@
       <div class = "pontos"><h1>Retornando...</h1></div>
     </section>
 
-    <!--Criando joystick-->
-    <div id="joystick1"></div>
-    <div id="joystick2"></div>
+<!-----------------Criando joystick-------------------------->
+<section id="joystick">
+  <div id="joys">
+    <div class="joystickWrapper1" id="joystickWrapper1"></div>
+    <div class="botoes" role="group" aria-label="Basic mixed styles example">
+      <button type="button" class="joystickTiroAr" id="joystickAr">AR</button> 
+      <button type="button" class="joystickTiroTerra" id="joystickTerra">TERRA</button>
+    </div>
+  </div>
+  </section>
+<script src="../libs/other/nipplejs.js"></script>  
 
    <div id="webgl-output">    
     <script type="module" src="appMobile.js"></script>
   </div>
-
 </body>
 
 </html>

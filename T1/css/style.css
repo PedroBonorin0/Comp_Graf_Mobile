@@ -32,7 +32,7 @@ html, body {
 
 .text {
     font-family:  'Special Elite', cursive;
-    font-size: 22px;
+    font-size: 20px;
     color: rgb(255, 255, 255);
     top: 50%;
     left: 50%;
@@ -149,22 +149,31 @@ html, body {
 
 /*---------------------Style joystick-----------------------*/
 
-#joystick1 {
+.joystick {
   pointer-events: auto;
   position: absolute;       
-  bottom: 0;
-  left: 0;
   display: block; 
   touch-action: manipulation;
 }
 
-#joystick2 {
-  pointer-events: auto;
-  position: absolute;       
-  bottom: 0;
-  right: 0;
-  display: block; 
-  touch-action: manipulation;
+.botoes {
+  opacity: 0.58;
+  margin: 86vh 0 0 65vw;
+  transform: scale(1.10);
+  position: absolute;
 }
 
+
+.joystickTiroAr {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  height: 32px;
+  width: 50px;
+
+}
+.joystickTiroTerra {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  height: 32px;
+  width: 50px;
+
+}
 
