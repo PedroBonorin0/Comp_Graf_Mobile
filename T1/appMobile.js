@@ -2,64 +2,85 @@ import * as THREE from  'three';
 import { degreesToRadians} from '../libs/util/util.js';
 import { animateDeadEnemies, animateDeadPlayer, colisions} from './colision.js';
 import {inicializeKeyboard, keyboardUpdate} from './playerLogic.js'
-import { enemiesOnScreen, moveEnemies } from './enemiesLogic.js';
+import { moveEnemies } from './enemiesLogic.js';
 import { generateLife, movelife } from './lifeCSG.js';
-import {createGroundPlaneWired } from '../libs/util/util.js';
-import { buildShot, moveShots } from './shots.js';
+import { playerShoot, moveShots } from './shots.js';
 import {initRenderer,
        initCamera,
        onWindowResize} from "../libs/util/util.js";
 import { jogo, reiniciaJogo, reiniciaJogo2 } from './ondas.js';
 import {GLTFLoader} from '../build/jsm/loaders/GLTFLoader.js';
 import { createLight } from './ilumination.js';
-import {criaWorld, rotateWorld} from './world.js'
 import { animateExplosoes } from './colision.js';
 import { Water } from '../build/jsm/objects/Water.js';  // Water shader in here
 
-
 // Inicialização de elelmentos -------------------------------------------------------------------------------------------------- 
 var scene = new THREE.Scene();    // Create main scene
-var renderer = initRenderer();    // View function in util/utils
+var renderer = initRenderer({ alpha: true });    // View function in util/utils
 var camera = initCamera(new THREE.Vector3(0, 100, 140)); // Init camera in this position
 // initDefaultBasicLight(scene);
-createLight(scene);
+//createLight(scene);
 createLight(scene);
 
 var scene2 = new THREE.Scene();    // Create second
-scene2.background = new THREE.Color(0xa3a3a3);
+// scene2.background = new THREE.Color(0xa3a3a3);
+renderer.autoClear = false;
 
-// Variáveis Gerais
-let posicaoSomePlano = -8E-14;
-let posicaoCriaPlano = 2E-14;
+let posicaoSomePlano = -11E-14;
+let posicaoCriaPlano = -2E-14;
 let velocidadePlano = -0.5;
+
+// -- SET SOUNDS ----------------------------------------------------------------------------------
+var audioLoader = new THREE.AudioLoader();
+var listener = new THREE.AudioListener();
+
+var music = new THREE.Audio(listener);
+
+audioLoader.load('./sounds/resistence.mp3', function(buffer) {
+  music.setBuffer(buffer);
+  music.setLoop(true);
+  if(music.isPlaying){
+    music.stop();
+  }
+  music.play();
+});
 
 var loader = new GLTFLoader();
 
-// create the ground plane ------------------------------------------------------------------------------------------------------
-let plane = generatePlano();
-plane.translateY(100);
-scene.add(plane);
-
 //-- SET WATER SHADER -----------------------------------------------------------------------------
-const waterGeometry = new THREE.PlaneGeometry( 500, 600 );
+const waterGeometry = new THREE.PlaneGeometry( 150, 500 );
 
 // Water shader parameters
-let water = new Water(
-  waterGeometry,
-  {
-    textureWidth: 512,
-    textureHeight: 512,
-    waterNormals: new THREE.TextureLoader().load( '../assets/textures/waternormals.jpg', function ( texture ) {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    } ),
-    sunDirection: new THREE.Vector3(),
-    sunColor: 0xffffff,
-    waterColor: 0x001e0f,
-    distortionScale: 3.7,
-  }
-);
-water.rotation.x = - Math.PI / 2;
-scene.add( water );
+let water;
+  water = new Water(
+    waterGeometry,
+    {
+      textureWidth: 512,
+      textureHeight: 512,
+      waterNormals: new THREE.TextureLoader().load( './assets/textures/waternormals.jpg', function ( texture ) {
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      } ),
+      sunDirection: new THREE.Vector3(),
+      sunColor: 0xffffff,
+      waterColor: 0x836FFF,
+      distortionScale: 0.7,
+      //reflectivity: 0.35,
+      flowDirection: new THREE.Vector2( -1, 0 ),
+    }
+  );
+  water.translateY(1);
+  water.position.set(0,2,-100);
+  water.transparent = true;
+  water.opacity = 0.5;
+  //water.translateZ(500);
+  water.rotateX (degreesToRadians(-90));
+  water.rotateZ (degreesToRadians(180));
+  scene.add(water);
+// create the ground plane ------------------------------------------------------------------------------------------------------
+//let plane = generatePlano();
+let plane = generateTerrain();
+//plane.translateZ(100);
+scene.add(plane);
 
 let outro;
 loader.load('./assets/death-star.gltf', function (glft) {
@@ -129,13 +150,13 @@ boxPlane.canShot = true;
 boxPlane.canMissel = true;
 
 var deadBoxPlane = new THREE.Mesh(airPlaneGeometry, airPlaneMaterial);
-
+ 
 deadBoxPlane.position.set(0.0, 36, 80);
 deadBoxPlane.rotateX(-3.14/2);
 
 // create a keyboard -------------------------------------------------------------------------------------------------------------
 var keyboard = inicializeKeyboard();
-
+ 
 // Listen window size changes ----------------------------------------------------------------------------------------------------
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
@@ -183,13 +204,21 @@ function controlledRender()
   renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
   renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
+  renderer.setClearColor(0x000000, 0);
   renderer.clear(); // Clean the small viewport
   renderer.render(scene2, virtualCamera);  // Render scene of the virtual camera
 }
 
-//criaWorld();
+var pause = false;
+var canClick = true;
 
-/* -------------------------------------inicializacao com botao--------------------------------------------*/
+function atualizaMusica(){
+  if(pause && music.isPlaying)
+    music.stop();
+
+  if(!pause && !music.isPlaying)
+    music.play()
+}
 
 function start(){
   var button  = document.getElementById("myBtn")
@@ -209,13 +238,26 @@ function start(){
   }
 }
 
-
 start();
 
-// render ------------------------------------------------------------------------------------------------------------------------
 function render()
-{   
+{
+  if(keyboard.pressed('P') && canClick){
+    canClick = false;
+    pause = !pause;
 
+    setTimeout(() => {
+      canClick = true;
+    }, 500);
+  }
+
+  atualizaMusica();
+
+  keyboardUpdate(keyboard, boxPlane, airPlane);
+
+  if(pause) {
+    requestAnimationFrame(render);
+  } else {
     if(keyboard.pressed('enter')){
       reiniciaJogo();
     }
@@ -231,8 +273,9 @@ function render()
     movelife();
       
     moveEnemies();
+  
+    water.material.uniforms[ 'time' ].value = water.material.uniforms[ 'time' ].value - 0.05;
     
-    keyboardUpdate(keyboard, boxPlane, airPlane);
     worldMovement();
     //moveCenario();
     //rotateWorld();
@@ -242,44 +285,30 @@ function render()
     
     controlledRender();
     
-    if(keyboard.pressed("ctrl") && boxPlane.canShot){
-      buildShot(scene, null, boxPlane, 3);
-    }
-    
-    if(keyboard.pressed("space") && boxPlane.canMissel){
-      console.log('missel');
-      buildShot(scene, null, boxPlane, 4);
-    }
-    
     if(keyboard.pressed("G") && canSwitchGodMode) {
       canSwitchGodMode = false;
       colisaoAtivada = !colisaoAtivada;
-
+  
       setTimeout(() => {
         canSwitchGodMode = true;
       }, 100);
     }
     
-    for(const enemy of enemiesOnScreen){
-      if(enemy.type === 'air' && enemy.canShot){
-        buildShot(scene, enemy, boxPlane, 1);
-      }
-      if(enemy.type === 'grd' && enemy.canShot){
-        buildShot(scene, enemy, boxPlane, 2);
-      }
-    }
+    playerShoot(scene, boxPlane, keyboard);
+
     airplaneHp -= colisions(1, airplaneHp, colisaoAtivada);
     airplaneHp -= colisions(2, airplaneHp, colisaoAtivada);
     airplaneHp -= colisions(3, airplaneHp, colisaoAtivada);
     colisions(4, airplaneHp, colisaoAtivada);
     colisions(5, airplaneHp, colisaoAtivada);
     airplaneHp -= colisions(6, airplaneHp, colisaoAtivada);
-
+  
     moveShots();
     
     animateExplosoes();
     animateDeadEnemies();
     animateDeadPlayer(scene);
+  }
 }
 
 // plane functions ----------------------------------------------------------------------------------------------------------------
@@ -288,42 +317,44 @@ var criaPlanoAux = true;
 var planoAux = null;
 
 function worldMovement() {
-  if(plane){
-    //console.log(plane.position);
-    if(plane)
-      plane.translateY(velocidadePlano);
-    if(planoAux)
-      planoAux.translateY(velocidadePlano);
-
-    if(plane && plane.position.y < posicaoSomePlano) {
+  if(plane) {
+    plane.translateY(velocidadePlano);
+    // console.log(plane.position)
+  }
+  if(planoAux) {
+    planoAux.translateY(velocidadePlano);
+    // console.log(planoAux.position)
+  }
+  
+  if(plane && plane.position.y < posicaoSomePlano) {
+      console.log('sumiu plano')
       plane.removeFromParent();
       plane = null;
       criaPlano = true;
     }
-
-    if(planoAux && planoAux.position.y  < posicaoSomePlano) {
+    
+    if(planoAux && planoAux.position.y < posicaoSomePlano) {
+      console.log('sumiu aux')
       planoAux.removeFromParent();
       planoAux = null;
       criaPlanoAux = true;
     }
-      
+    
     if(criaPlanoAux && plane && plane.position.y < posicaoCriaPlano) {
-    criaPlanoAux = false;
-    planoAux = generatePlano();
-    //planoAux = plane;
-    planoAux.receiveShadow = true;
-    planoAux.translateY(590);
-    scene.add(planoAux);
+      console.log('criou aux')
+      criaPlanoAux = false;
+      planoAux = generateTerrain();
+      planoAux.translateY(380);
+      scene.add(planoAux);
     }
     
     if(criaPlano && planoAux && planoAux.position.y < posicaoCriaPlano) {
+      console.log('criou')
       criaPlano = false;
-      plane = generatePlano();
-      planoAux.receiveShadow = true;
-      plane.translateY(590);
+      plane = generateTerrain();
+      plane.translateY(387);
       scene.add(plane);
     }
-  }
 }
 
 //var vPlane = true;
@@ -360,7 +391,162 @@ function moveCenario(){
 }
 
 function generatePlano() {
-  return createGroundPlaneWired(500, 500);
+  var textureLoader = new THREE.TextureLoader();
+  var grass = textureLoader.load('./assets/textures/grama.jpg');
+  var rock = textureLoader.load('./assets/textures/terra.jpg');
+  var areia = textureLoader.load('./assets/textures/areia.jpg');
+  
+  var geometry1 = new THREE.BoxGeometry(120,0.2,500);
+  var geometry2 = new THREE.BoxGeometry(40,0.2,500);
+  var geometry3 = new THREE.BoxGeometry(240,0.2,500);
+  var geometry4 = new THREE.BoxGeometry(15,0.2,500);
+  
+  var material1 = new THREE.MeshLambertMaterial();
+  var material2 = new THREE.MeshLambertMaterial();
+  var material3 = new THREE.MeshLambertMaterial();
+
+  material1.map = areia;
+  material1.map.wrapS = THREE.RepeatWrapping;
+  material1.map.wrapT = THREE.RepeatWrapping;
+  material1.map.minFilter = THREE.LinearFilter;
+  material1.map.magFilter = THREE.NearestFilter;
+
+  material2.map = rock;
+  material2.map.wrapS = THREE.RepeatWrapping;
+  material2.map.wrapT = THREE.RepeatWrapping;
+  material2.map.minFilter = THREE.LinearFilter;
+  material2.map.magFilter = THREE.NearestFilter;
+
+  material3.map = grass;
+  material3.map.wrapS = THREE.RepeatWrapping;
+  material3.map.wrapT = THREE.RepeatWrapping;
+  material3.map.minFilter = THREE.LinearFilter;
+  material3.map.magFilter = THREE.NearestFilter;
+  
+  var cube1 = new THREE.Mesh(geometry1, material1);
+  var cube2 = new THREE.Mesh(geometry2, material2);
+  var cube3 = new THREE.Mesh(geometry2, material2);
+  var cube4 = new THREE.Mesh(geometry3, material3);
+  var cube5 = new THREE.Mesh(geometry3, material3);
+  var cube6 = new THREE.Mesh(geometry4, material2);
+  var cube7 = new THREE.Mesh(geometry4, material2);
+
+  cube1.add(cube2, cube3, cube4, cube5);
+
+  cube1.translateY(-10);
+
+  cube6.translateX(-85);
+  cube6.translateY(5);
+  cube6.rotateZ(degreesToRadians(-10));
+
+  cube7.translateX(85);
+  cube7.translateY(5);
+  cube7.rotateZ(degreesToRadians(10));
+
+  cube2.translateX(-70);
+  cube2.translateY(2);
+  cube2.rotateZ(degreesToRadians(-25));
+
+  cube3.translateX(70);
+  cube3.translateY(2);
+  cube3.rotateZ(degreesToRadians(25));
+
+  cube4.translateY(7);
+  cube4.translateX(207);
+
+  cube5.translateY(7);
+  cube5.translateX(-207);
+
+  cube1.position.set(0,0,-100);
+
+  return cube1;
+}
+
+function generateTerrain(){
+  var textureLoader = new THREE.TextureLoader();
+  var grass = textureLoader.load('./assets/textures/grama.jpg');
+  var rock = textureLoader.load('./assets/textures/terra.jpg');
+  var areia = textureLoader.load('./assets/textures/areia.jpg');
+  
+  var geometry1 = new THREE.PlaneBufferGeometry(120,500, 10, 10);
+  var geometry2 = new THREE.PlaneBufferGeometry(40,500, 10, 10);
+  var geometry3 = new THREE.PlaneBufferGeometry(240,500, 10, 10);
+
+  const vertex2 = new THREE.Vector3();
+  const positionAttribute2 = geometry2.getAttribute('position');
+  for(var i=0; i<positionAttribute2.count; i++){
+    var x = positionAttribute2.getX( i );
+    var y = positionAttribute2.getY( i );
+    var z = positionAttribute2.getZ( i );
+
+    z += Math.random() * 5;
+    
+    positionAttribute2.setXYZ( i, x, y, z );
+  }
+
+  const vertex3 = new THREE.Vector3();
+  const positionAttribute3 = geometry3.getAttribute('position');
+  for(var i=0; i<positionAttribute3.count; i++){
+    var x = positionAttribute3.getX( i );
+    var y = positionAttribute3.getY( i );
+    var z = positionAttribute3.getZ( i );
+
+    z += Math.random() * 10;
+    
+    positionAttribute3.setXYZ( i, x, y, z );
+  }
+
+  var material1 = new THREE.MeshLambertMaterial();
+  var material2 = new THREE.MeshLambertMaterial();
+  var material3 = new THREE.MeshLambertMaterial();
+
+  material1.map = areia;
+  material1.map.wrapS = THREE.RepeatWrapping;
+  material1.map.wrapT = THREE.RepeatWrapping;
+  material1.map.minFilter = THREE.LinearFilter;
+  material1.map.magFilter = THREE.NearestFilter;
+
+  material2.map = rock;
+  material2.map.wrapS = THREE.RepeatWrapping;
+  material2.map.wrapT = THREE.RepeatWrapping;
+  material2.map.minFilter = THREE.LinearFilter;
+  material2.map.magFilter = THREE.NearestFilter;
+
+  material3.map = grass;
+  material3.map.wrapS = THREE.RepeatWrapping;
+  material3.map.wrapT = THREE.RepeatWrapping;
+  material3.map.minFilter = THREE.LinearFilter;
+  material3.map.magFilter = THREE.NearestFilter;
+  
+  var cube1 = new THREE.Mesh(geometry1, material1);
+  var cube2 = new THREE.Mesh(geometry2, material2);
+  var cube3 = new THREE.Mesh(geometry2, material2);
+  var cube4 = new THREE.Mesh(geometry3, material3);
+  var cube5 = new THREE.Mesh(geometry3, material3);
+
+  cube1.add(cube2, cube3, cube4, cube5);
+
+  cube1.rotateX(degreesToRadians(-90));
+  //cube1.translateY(-10);
+
+  cube2.translateX(-70);
+  cube2.translateZ(8);
+  cube2.rotateY(degreesToRadians(-10));
+
+  cube3.translateX(70);
+  cube3.translateZ(8);
+  cube3.rotateY(degreesToRadians(10));
+
+  cube4.translateY(7);
+  cube4.translateX(207);
+
+  cube5.translateY(7);
+  cube5.translateX(-207);
+
+  cube1.position.set(0,0,-150);
+
+  // scene.add(cube1);
+  return cube1;
 }
 
 function generateCube(x, y, z){

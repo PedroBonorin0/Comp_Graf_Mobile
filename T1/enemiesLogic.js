@@ -36,18 +36,22 @@ export function moveEnemies() {
         aux.object.rotateY(enemy.spin);
       }
   
-      if(enemy.position.z > 300 || enemy.position.x < -300 || enemy.position.x > 300) {
+      if(enemy.position.z > 110 || enemy.position.x < -140 || enemy.position.x > 120) {
         enemy.removeFromParent();
+        aux.object.removeFromParent();
 
         const indexToRemove = enemiesOnScreen.indexOf(enemy);
         enemiesOnScreen.splice(indexToRemove, 1);
         enemiesOnScreenCounter--;
+
+        textureOnScreen.splice(indexToRemove);
       }
     }
   }
 }
 
 function generateEnemyVertical(type, x, z) {
+  enemiesOnScreenCounter++;
   var newEnemy;
   let asset = {
     object: null,
@@ -58,6 +62,7 @@ function generateEnemyVertical(type, x, z) {
 
     if(type === 'air') {
       loader.load( './assets/t-figther.gltf', function ( gltf ) {
+        console.log('ta carregando')
         let obj = gltf.scene;
         obj.traverse( function ( child ) {
           if ( child.isMesh ) {
@@ -78,7 +83,6 @@ function generateEnemyVertical(type, x, z) {
         newEnemy.canShot = true;
     
         enemiesOnScreen.push(newEnemy);
-        enemiesOnScreenCounter++;
 
         textureOnScreen.push(asset);
         
@@ -107,7 +111,6 @@ function generateEnemyVertical(type, x, z) {
         newEnemy.canShot = true;
     
         enemiesOnScreen.push(newEnemy);
-        enemiesOnScreenCounter++;
 
         textureOnScreen.push(asset);
         
@@ -119,6 +122,7 @@ function generateEnemyVertical(type, x, z) {
 }
 
 function generateEnemyHorizontal(type, x, z, side) {
+  enemiesOnScreenCounter++;
   var newEnemy;
   let asset = {
     object: null,
@@ -139,9 +143,9 @@ function generateEnemyHorizontal(type, x, z, side) {
       newEnemy.type = 'air';
       
       if(side === 'dir')
-        newEnemy.speedX = -0.8;
-        else
         newEnemy.speedX = 0.8;
+      else
+        newEnemy.speedX = -0.8;
         
         newEnemy.speedZ = 0;
         newEnemy.position.set(x, 36, z);
@@ -150,28 +154,27 @@ function generateEnemyHorizontal(type, x, z, side) {
         asset.object = gltf.scene;
         asset.object.position.set(x, 36, z);
         obj.position.set(x, 36, z);
-      } else {
-        newEnemy = new THREE.Mesh(enemyGeometryGround, enemyMaterialGround);
-        newEnemy.type = 'grd';
-        
-        if(side === 'dir')
-        newEnemy.speedX = -0.8;
-        else
+    } else {
+      newEnemy = new THREE.Mesh(enemyGeometryGround, enemyMaterialGround);
+      newEnemy.type = 'grd';
+      
+      if(side === 'dir')
         newEnemy.speedX = 0.8;
-        
-        newEnemy.speedZ = 0;
-        newEnemy.position.set(x, 10, z);
+      else
+        newEnemy.speedX = -0.8;
+      
+      newEnemy.speedZ = 0;
+      newEnemy.position.set(x, 10, z);
 
-        obj.scale.set(1.25, 1.25, 1.25);
-        asset.object = gltf.scene;
-        asset.object.position.set(x, 10, z);
-        obj.position.set(x, 10, z);
-      }
+      obj.scale.set(1.25, 1.25, 1.25);
+      asset.object = gltf.scene;
+      asset.object.position.set(x, 10, z);
+      obj.position.set(x, 10, z);
+    }
 
       newEnemy.canShot = true;
       
       enemiesOnScreen.push(newEnemy);
-      enemiesOnScreenCounter++;
 
       textureOnScreen.push(asset);
       
@@ -181,7 +184,8 @@ function generateEnemyHorizontal(type, x, z, side) {
     }, null, null);
   }
   
-  function generateEnemyDiagonal(type, x, z, hor, vert) {
+function generateEnemyDiagonal(type, x, z, hor, vert) {
+  enemiesOnScreenCounter++;
   var newEnemy;
   let asset = {
     object: null,
@@ -190,7 +194,7 @@ function generateEnemyHorizontal(type, x, z, side) {
 
   let loader = new GLTFLoader();
 
-  loader.load( './assets/t-fighter.gltf', function ( gltf ) {
+  loader.load( './assets/t-advanced.gltf', function ( gltf ) {
     let obj = gltf.scene;
     obj.traverse( function ( child ) {
       if ( child.isMesh ) {
@@ -239,7 +243,6 @@ function generateEnemyHorizontal(type, x, z, side) {
     newEnemy.canShot = true;
 
     enemiesOnScreen.push(newEnemy);
-    enemiesOnScreenCounter++;
 
     textureOnScreen.push(asset);
     
@@ -249,6 +252,7 @@ function generateEnemyHorizontal(type, x, z, side) {
 }
 
 function generateEnemyArco(type, x, z, rot) {
+  enemiesOnScreenCounter++;
   var newEnemy;
   let asset = {
     object: null,
@@ -257,7 +261,7 @@ function generateEnemyArco(type, x, z, rot) {
 
   let loader = new GLTFLoader();
 
-  loader.load( './assets/seeker.gltf', function ( gltf ) {
+  loader.load( './assets/t-advanced.gltf', function ( gltf ) {
     let obj = gltf.scene;
     obj.traverse( function ( child ) {
       if ( child.isMesh ) {
@@ -273,13 +277,13 @@ function generateEnemyArco(type, x, z, rot) {
       newEnemy.speedZ = -1;
       
       if(rot === 'dir')
-        newEnemy.spin = 1 * (Math.PI/180) / 4;
-      else
         newEnemy.spin = -1 * (Math.PI/180) / 4;
+      else
+        newEnemy.spin = 1 * (Math.PI/180) / 4;
       
       newEnemy.position.set(x, 36, z);
 
-      obj.scale.set(3,3,3);
+      obj.scale.set(1.25, 1.25, 1.25);
       asset.object = gltf.scene;
       asset.object.position.set(x, 36, z);
       obj.position.set(x, 36, z);
@@ -291,7 +295,7 @@ function generateEnemyArco(type, x, z, rot) {
 
       newEnemy.position.set(x, 10, z);
 
-      obj.scale.set(3,3,3);
+      obj.scale.set(1.25, 1.25, 1.25);
       asset.object = gltf.scene;
       asset.object.position.set(x, 10, z);
       obj.position.set(x, 10, z);
@@ -300,7 +304,6 @@ function generateEnemyArco(type, x, z, rot) {
     newEnemy.canShot = true;
     
     enemiesOnScreen.push(newEnemy);
-    enemiesOnScreenCounter++;
 
     textureOnScreen.push(asset);
     
