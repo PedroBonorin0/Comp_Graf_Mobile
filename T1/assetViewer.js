@@ -59,6 +59,8 @@ loadGLTFFile('./assets/','t-figther.gltf', 2.0, 90, false);
 loadGLTFFile('./assets/','t-advanced.gltf', 2.0, 90, false);
 loadGLTFFile('./assets/','seeker.gltf', 2.0, 0, false);
 loadGLTFFile('./assets/','droid-tank.gltf', 3.0, 90, false);
+loadGLTFFile('./assets/','bullet.glb', 1.0, 90, false);
+loadGLTFFile('./assets/','grenade.glb', 1.0, 90, false);
 
 buildInterface();
 render();
@@ -202,7 +204,7 @@ function buildInterface()
   // GUI interface
   var gui = new GUI();
   gui.add(controls, 'type',
-  ['Object0', 'Object1', 'Object2', 'Object3', 'Object4'])
+  ['Object0', 'Object1', 'Object2', 'Object3', 'Object4', 'Object5', 'Object6'])
     .name("Change Object")
     .onChange(function(e) { controls.onChooseObject(); });
   gui.add(controls, 'viewAxes', false)

@@ -18,8 +18,6 @@ import { Water } from '../build/jsm/objects/Water.js';  // Water shader in here
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer({ alpha: true });    // View function in util/utils
 var camera = initCamera(new THREE.Vector3(0, 100, 140)); // Init camera in this position
-// initDefaultBasicLight(scene);
-//createLight(scene);
 createLight(scene);
 
 var scene2 = new THREE.Scene();    // Create second
@@ -108,10 +106,6 @@ loader.load('./assets/death-star.gltf', function (glft) {
   obj.position.set(465, -80,20);
   outro.rotateY(degreesToRadians(90));
 });
-
-//plane.receiveShadow = true;
-//plane.translateY(100);
-//scene.add(plane);
 
 // Create CSG HP ----------------------------------------------------------------------------------------------------------------
 var lifeOnScreen = [];
@@ -245,15 +239,20 @@ function start(){
       var element = e.target;
       element.remove();  
     }); 
+    addJoysticks();
+    
     render(); 
   }
 }
 
 // ------------------------------TELA DE GAME OVER--------------------------------------
+var joy;
 export function showGameOverScreen() {
   pause = true;
 
   deathMusic.play();
+
+  hideJoysticks();
 
   var gameOver = document.getElementById('over');
   document.getElementById('game-over').style.display = "block";
@@ -264,24 +263,34 @@ export function showGameOverScreen() {
     document.getElementById('game-over').style.display = "none";
     gameOver.classList.remove('tela-over');
     deathMusic.stop();
+    
+    joy[0].el.style.display = 'block';
+
   }, 13000);
+}
+
+var shotBtns;
+
+function addJoysticks(){
+
+  joy = nipplejs.create({
+    zone: document.getElementById('joystickWrapper1'),
+    mode: 'static',
+    position: {left: '20vw', top: '88vh'},
+  });
+
+  shotBtns = document.querySelector('.botoes');
+  shotBtns.style.display = 'block';
+}
+
+function hideJoysticks() {
+  joy[0].el.style.display = 'none';
 }
 
 start();
 
 //------------------------------ADICIONANDO JOYSTICK------------------------------------------------
 
-function addJoysticks(){
-
-  var joy = nipplejs.create({
-    zone: document.getElementById('joystickWrapper1'),
-    mode: 'static',
-    position: {left: '20vw', top: '88vh'},
-});
-}
-
-//-----------------------------------------------
-//addJoysticks();
 
 //----------------------------FUNÇÃO RENDER---------------------------------------------------------
 
@@ -295,7 +304,6 @@ function render()
       canClick = true;
     }, 500);
   }
-  addJoysticks();
   atualizaMusica();
 
   keyboardUpdate(keyboard, boxPlane, airPlane);

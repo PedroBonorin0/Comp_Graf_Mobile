@@ -19,39 +19,57 @@ export function inicializeKeyboard(){
 }
 
 function inclination(airPlane){
-    for(var i = 0; i< 3; i++){
-        setTimeout(() => {
-            airPlane.rotateOnWorldAxis(3.14/9);
-          },250);
-    }
+  for(var i = 0; i< 3; i++){
+    setTimeout(() => {
+      airPlane.rotateOnWorldAxis(3.14/9);
+    },250);
+  }
 }
 
 export function keyboardUpdate(kb, obj, airPlane){
-   kb.update();
-   if (kb.pressed("up") && obj.position.y < 36.16 && airPlane != undefined){
-       obj.translateY(2);
-       airPlane.translateZ(2);
-    }
-    if (kb.pressed("down") && obj.position.y > 35.992 && airPlane != undefined){
-        obj.translateY(-2);
-        airPlane.translateZ(-2);
-    }
-    if (kb.pressed("right") && obj.position.x < 57 && airPlane != undefined){
-        obj.translateX(2);
-        airPlane.position.set(airPlane.position.x + 2, airPlane.position.y, airPlane.position.z);
-        rotateAirplane('dir', airPlane);
-    }
-    else{
-        fixRotation('dir', airPlane);
-    }
-    if (kb.pressed("left") && obj.position.x > -57 && airPlane != undefined){
-        obj.translateX(-2);
-        airPlane.position.set(airPlane.position.x - 2, airPlane.position.y, airPlane.position.z);
-        rotateAirplane('esq', airPlane);
-   }
-   else{
-      fixRotation('esq', airPlane);
-   }
+  kb.update();
+  if (kb.pressed("up") && obj.position.y < 36.16 && airPlane != undefined){
+    moveUp(obj, airPlane)
+  }
+
+  if (kb.pressed("down") && obj.position.y > 35.992 && airPlane != undefined){
+    moveDown(obj, airPlane)
+  }
+
+  if (kb.pressed("right") && obj.position.x < 57 && airPlane != undefined){
+    moveRight(obj, airPlane)
+  } else{
+      fixRotation('dir', airPlane);
+  }
+
+  if (kb.pressed("left") && obj.position.x > -57 && airPlane != undefined){
+    moveLeft(obj, airPlane)
+  }
+  else{
+    fixRotation('esq', airPlane);
+  }
+}
+
+export function moveUp(obj, airPlane) {
+  obj.translateY(2);
+  airPlane.translateZ(2);
+}
+
+export function moveDown(obj, airPlane) {
+  obj.translateY(-2);
+  airPlane.translateZ(-2);
+}
+
+export function moveRight(obj, airPlane) {
+  obj.translateX(2);
+  airPlane.position.set(airPlane.position.x + 2, airPlane.position.y, airPlane.position.z);
+  rotateAirplane('dir', airPlane);
+}
+
+export function moveLeft(obj, airPlane) {
+  obj.translateX(-2);
+  airPlane.position.set(airPlane.position.x - 2, airPlane.position.y, airPlane.position.z);
+  rotateAirplane('esq', airPlane);
 }
 
 function rotateAirplane(direction, airPlane) {
