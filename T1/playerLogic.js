@@ -26,6 +26,17 @@ function inclination(airPlane){
   }
 }
 
+
+/*
+export function keyboardUpdate(kb, obj, airPlane){
+  if (kb.pressed("touchstart") && obj.position.y < 36.16 && airPlane != undefined){
+    moveUp(obj, airPlane)
+  }
+}
+var joystikUP  = document.getElementById("joystickWrapper1");
+joystikUP.addEventListener("click", keyboardUpdate);
+*/
+
 export function keyboardUpdate(kb, obj, airPlane){
   kb.update();
   if (kb.pressed("up") && obj.position.y < 36.16 && airPlane != undefined){
@@ -51,13 +62,13 @@ export function keyboardUpdate(kb, obj, airPlane){
 }
 
 export function moveUp(obj, airPlane) {
-  obj.translateY(2);
-  airPlane.translateZ(2);
+  obj.translateY(0.8);
+  airPlane.translateZ(0.8);
 }
 
 export function moveDown(obj, airPlane) {
-  obj.translateY(-2);
-  airPlane.translateZ(-2);
+  obj.translateY(-0.8);
+  airPlane.translateZ(-0.8);
 }
 
 export function moveRight(obj, airPlane) {
@@ -72,7 +83,7 @@ export function moveLeft(obj, airPlane) {
   rotateAirplane('esq', airPlane);
 }
 
-function rotateAirplane(direction, airPlane) {
+export function rotateAirplane(direction, airPlane) {
   if(airPlane !== undefined && direction === 'dir' && rotaDir < 11){
     airPlane.rotateZ(degreesToRadians(3));
     rotaDir = rotaDir + 1;
@@ -84,7 +95,7 @@ function rotateAirplane(direction, airPlane) {
   }
 }
 
-function fixRotation(direction, airPlane) {
+export function fixRotation(direction, airPlane) {
   if(airPlane !== undefined && direction === 'dir' && rotaDir>0){
     airPlane.rotateZ(degreesToRadians(-3));
     rotaDir--;
@@ -97,6 +108,7 @@ function fixRotation(direction, airPlane) {
 }
 
 // Funções de atualização de variáveis ----------------------------------------------------------------
+
 export function setCanCreateShot(){
     canCreateShot = true;
 }

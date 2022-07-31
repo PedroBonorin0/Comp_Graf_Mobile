@@ -1,6 +1,8 @@
 import * as THREE from  'three';
 import {GLTFLoader} from '../build/jsm/loaders/GLTFLoader.js';
 import { enemiesOnScreen } from './enemiesLogic.js';
+import { Buttons } from '../libs/other/buttons.js';
+
 
 /**
  * type == 1: Inimigo Aereo;
@@ -28,10 +30,31 @@ var playerMissel = new THREE.Audio(listener);
 var loader = new GLTFLoader();
 
 
+var butoes_tiro = new Buttons(buttonAR , buttonTERRA);
+
+var pressAR = false;
+var pressTERRA = false;
+
+function buttonAR(event){
+  switch(event.target.id){
+    case "joystickAr":
+      pressAR = true;
+      break;
+    case "joystickTerra":
+      pressTERRA = true;
+      break;
+  }
+}
+
+function buttonTERRA(event){
+  pressAR = false;
+  pressTERRA = false;
+}
+
 export function playerShoot(scn, player, keyboard) {
   console.log('segudando', taSegurando)
 
-  if(keyboard.pressed("ctrl")){
+  if(keyboard.pressed("ctrl") || pressAR === true){
     buildShot(scn, null, player, 3);
     if(clickOnPrevFrame)
       taSegurando = true;
@@ -44,7 +67,7 @@ export function playerShoot(scn, player, keyboard) {
     taSegurando = false;
   }
   
-  if(keyboard.pressed("space") && player.canMissel)
+  if(keyboard.pressed("space") || pressTERRA === true && player.canMissel)
     buildShot(scn, null, player, 4);
 
   for(const enemy of enemiesOnScreen){
@@ -324,6 +347,7 @@ export function moveShots(){
     }
   }
 }
+
 
 export function clearShots(){
   for(const shot of shots){
