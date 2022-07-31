@@ -1,7 +1,7 @@
 import * as THREE from  'three';
 import { degreesToRadians} from '../libs/util/util.js';
 import { animateDeadEnemies, animateDeadPlayer, colisions} from './colision.js';
-import {inicializeKeyboard, keyboardUpdate} from './playerLogic.js'
+import {inicializeKeyboard, keyboardUpdate, moveDown, moveUp, moveLeft,moveRight, fixRotation, rotateAirplane} from './playerLogic.js'
 import { moveEnemies } from './enemiesLogic.js';
 import { generateLife, movelife } from './lifeCSG.js';
 import { playerShoot, moveShots } from './shots.js';
@@ -246,6 +246,7 @@ function start(){
 }
 
 // ------------------------------TELA DE GAME OVER--------------------------------------
+
 var joy;
 export function showGameOverScreen() {
   pause = true;
@@ -269,10 +270,19 @@ export function showGameOverScreen() {
   }, 13000);
 }
 
+
+start();
+
+//------------------------------ADICIONANDO JOYSTICK------------------------------------------------
+
 var shotBtns;
+var fwdValue = 0;
+var bkdValue = 0;
+var rgtValue = 0;
+var lftValue = 0;
 
 function addJoysticks(){
-
+  
   joy = nipplejs.create({
     zone: document.getElementById('joystickWrapper1'),
     mode: 'static',
@@ -281,18 +291,66 @@ function addJoysticks(){
 
   shotBtns = document.querySelector('.botoes');
   shotBtns.style.display = 'block';
+  
+  joy.on('move', function (evt, data) {
+    const forward = data.vector.y
+    const turn = data.vector.x
+    fwdValue = bkdValue = lftValue = rgtValue = 0;
+
+    if (forward > 0) 
+      fwdValue = Math.abs(forward)
+    else if (forward < 0)
+      bkdValue = Math.abs(forward)
+
+    if (turn > 0) 
+      rgtValue = Math.abs(turn)
+    else if (turn < 0)
+      lftValue = Math.abs(turn)
+  })
+
+
+  joy.on('end', function (evt) {
+    bkdValue = 0
+    fwdValue = 0
+    lftValue = 0
+    rgtValue = 0
+  })
+
+
+
 }
 
 function hideJoysticks() {
   joy[0].el.style.display = 'none';
 }
 
-start();
+function movimentaJoystick(obj,airPlane){
+  if (fwdValue > 0 && obj.position.y < 36.16 && airPlane != undefined) {
+    moveUp(obj,airPlane);
+    console.log(obj.position);
+  }
+  
+  if (bkdValue > 0 && obj.position.y > 34 && airPlane != undefined) {
+    moveDown(obj,airPlane);
+    console.log(obj.position);
+  }
 
-//------------------------------ADICIONANDO JOYSTICK------------------------------------------------
+  if (lftValue > 0  && obj.position.x > -50 && airPlane != undefined) {
+    moveLeft(obj,airPlane);
+    rotateAirplane('esq', airPlane);
+  }else{
+    fixRotation('esq', airPlane);
+  }
 
-
+  if (rgtValue > 0  && obj.position.x < 56 && airPlane != undefined) {
+    moveRight(obj,airPlane);
+    rotateAirplane('dir', airPlane);
+  } else{
+    fixRotation('dir', airPlane);
+}
+} 
 //----------------------------FUNÇÃO RENDER---------------------------------------------------------
+
 
 function render()
 {
@@ -304,8 +362,8 @@ function render()
       canClick = true;
     }, 500);
   }
+  movimentaJoystick(boxPlane,airPlane);
   atualizaMusica();
-
   keyboardUpdate(keyboard, boxPlane, airPlane);
 
   if(pause) {
