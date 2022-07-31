@@ -7,7 +7,8 @@ import { scene,
          airPlane, 
          boxPlane,
          deadAirPlane,
-         lifeOnScreen,} from './appMobile.js';
+         lifeOnScreen,
+         showGameOverScreen } from './appMobile.js';
 
 var deadEnemies = [];
 var deadPlayer = [];
@@ -97,6 +98,8 @@ export function colisions(type, airplaneHp, colisaoAtivada){
     airPlane.removeFromParent();
     deadPlayer.push(deadAirPlane);
     set = true;
+
+    showGameOverScreen();
 
     return 0;
   }

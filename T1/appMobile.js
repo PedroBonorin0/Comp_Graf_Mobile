@@ -39,11 +39,22 @@ var music = new THREE.Audio(listener);
 audioLoader.load('./sounds/resistence.mp3', function(buffer) {
   music.setBuffer(buffer);
   music.setLoop(true);
+  music.setVolume( 0.3 );
   if(music.isPlaying){
     music.stop();
   }
   music.play();
 });
+
+var deathMusic = new THREE.Audio(listener);
+
+audioLoader.load('./sounds/playerExplode.mp3', function(buffer) {
+  deathMusic.setBuffer(buffer);
+  deathMusic.setVolume( 0.5 );
+  if(deathMusic.isPlaying){
+    deathMusic.stop();
+  }
+})
 
 var loader = new GLTFLoader();
 
@@ -221,11 +232,10 @@ function atualizaMusica(){
 }
 
 function start(){
-  var button  = document.getElementById("myBtn")
-  button.innerHTML = 'START';
-  button.addEventListener("click", onButtonPressed);
+  var button  = document.getElementById("myBtn");
+  button.addEventListener("click", iniciaGame);
           
-  function onButtonPressed() {
+  function iniciaGame() {
     var loadingScreen = document.getElementById( 'load-tela' );
     document.getElementById('load-screen').style.display= "none";
     loadingScreen.transition = 0;
@@ -236,6 +246,24 @@ function start(){
     }); 
     render(); 
   }
+}
+
+
+export function showGameOverScreen() {
+  pause = true;
+
+  deathMusic.play();
+
+  var gameOver = document.getElementById('over');
+  document.getElementById('game-over').style.display = "block";
+  gameOver.transition = 0;
+  gameOver.classList.add('tela-over');
+  setTimeout(() => {
+    pause = false;
+    document.getElementById('game-over').style.display = "none";
+    gameOver.classList.remove('tela-over');
+    deathMusic.stop();
+  }, 13000);
 }
 
 start();

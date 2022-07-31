@@ -64,6 +64,7 @@ html, body {
    width: 100px;
    border-radius: 10%;
    background-color: rgb(255, 255, 255);
+   cursor: pointer;
 }
 
 /*---------------------Style pagina de game over-----------------------*/
@@ -104,6 +105,13 @@ html, body {
   color: rgb(255, 0, 0);
   text-align: center;
   animation: efeito 10s reverse both;
+}
+
+.tela-over {
+  background: linear-gradient(-45deg , rgb(57, 57, 57) , rgb(0, 0, 0)), white;
+  animation: efect-background 10s ease infinite;
+  height: 100vh;
+  width: 100vw;
 }
 
 .over{
